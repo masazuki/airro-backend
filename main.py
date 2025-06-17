@@ -29,23 +29,31 @@ class OrderRequest(BaseModel):
     distance_m: float
     price: float
 
-@app.post("/api/v1/calculate-route", response_model=RouteResponse)
+@app.post("/api/v1/calculate-route")
 def calculate_route(req: RouteRequest):
     return {
         "status": "Success",
         "path": [[req.start_lat, req.start_lng], [req.end_lat, req.end_lng]],
-        "distance": 1450.0,
+        "distance_m": 1450.0,
         "duration": 510.0,
         "price": 1750.0,
-        "predictedValues": {
-            "estimatedTimeSec": 510,
-            "requiredBatteryPercent": 38.5,
-            "routeRiskLevel": 0.07
+        "predicted_values": {
+            "estimated_time_sec": 510,
+            "required_battery_percent": 38.5,
+            "route_risk_level": 0.07
         },
         "weatherInfo": {
             "description": "Солнечно",
-            "windSpeedMps": 3.2,
-            "isRain": False
+            "wind_speed_mps": 3.2,
+            "is_rain": False
         },
         "warnings": ["Возможны порывы ветра на высоте"]
     }
+
+@app.post("/api/v1/submit-order")
+def submit_order(req: OrderRequest):
+    return {"status": "Order received"}
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)

@@ -2,6 +2,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
+import os
+import uvicorn
 
 app = FastAPI()
 
@@ -36,7 +38,6 @@ class OrderRequest(BaseModel):
 
 @app.post("/api/v1/calculate-route", response_model=RouteResponse)
 def calculate_route(req: RouteRequest):
-    # Возвращаем фиктивный маршрут (две точки: старт и финиш)
     return RouteResponse(
         status="Success",
         path=[[req.start_lat, req.start_lng], [req.end_lat, req.end_lng]],
@@ -47,5 +48,9 @@ def calculate_route(req: RouteRequest):
 
 @app.post("/api/v1/submit-order")
 def submit_order(req: OrderRequest):
-    # Просто подтверждаем приём заказа
-    return {"status": "Order received"} 
+    return {"status": "Order received"}
+
+# ✅ ВАЖНО: запуск uvicorn, поддерживающий Render
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)

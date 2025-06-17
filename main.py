@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
@@ -7,7 +7,7 @@ import uvicorn
 
 app = FastAPI()
 
-# Разрешаем запросы с любого источника (для теста)
+# Разрешаем запросы с любого источника
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,13 +22,6 @@ class RouteRequest(BaseModel):
     end_lat: float
     end_lng: float
 
-class RouteResponse(BaseModel):
-    status: str
-    path: List[List[float]]
-    distance: float = 1.23
-    duration: float = 6.0
-    price: float = 1000.0
-
 class OrderRequest(BaseModel):
     from_: str
     to: str
@@ -38,19 +31,21 @@ class OrderRequest(BaseModel):
 
 @app.post("/api/v1/calculate-route", response_model=RouteResponse)
 def calculate_route(req: RouteRequest):
-    return RouteResponse(
-        status="Success",
-        path=[[req.start_lat, req.start_lng], [req.end_lat, req.end_lng]],
-        distance=1.23,
-        duration=6.0,
-        price=1000.0
-    )
-
-@app.post("/api/v1/submit-order")
-def submit_order(req: OrderRequest):
-    return {"status": "Order received"}
-
-# ✅ ВАЖНО: запуск uvicorn, поддерживающий Render
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port)
+    return {
+        "status": "Success",
+        "path": [[req.start_lat, req.start_lng], [req.end_lat, req.end_lng]],
+        "distance": 1450.0,
+        "duration": 510.0,
+        "price": 1750.0,
+        "predictedValues": {
+            "estimatedTimeSec": 510,
+            "requiredBatteryPercent": 38.5,
+            "routeRiskLevel": 0.07
+        },
+        "weatherInfo": {
+            "description": "Солнечно",
+            "windSpeedMps": 3.2,
+            "isRain": False
+        },
+        "warnings": ["Возможны порывы ветра на высоте"]
+    }
